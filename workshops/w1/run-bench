@@ -1,0 +1,54 @@
+#!/bin/bash
+
+# First Set
+N[0]=80
+NR[0]=50
+
+N[1]=160
+NR[1]=50
+
+N[2]=320
+NR[2]=50
+
+
+# Second Set
+N[3]=80
+NR[3]=100
+
+N[4]=160
+NR[4]=100
+
+N[5]=320
+NR[5]=100
+
+
+# Third Set
+N[6]=80
+NR[6]=200
+
+N[7]=160
+NR[7]=200
+
+N[8]=320
+NR[8]=200
+
+
+# Fourth Set
+N[9]=80
+NR[9]=400
+
+N[9]=160
+NR[9]=400
+
+N[9]=320
+NR[9]=400
+
+exec &> w1.logs
+
+g++ -O2 -g -pg -ow1 w1.cpp
+for i in {0..9}
+do
+  echo $i
+  ./w1 ${N[$i]} ${NR[$i]}
+  gprof -p w1 > "${N[$i]}x${NR[$i]}.log"
+done
