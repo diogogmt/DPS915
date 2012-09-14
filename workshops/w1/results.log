@@ -1,9 +1,0 @@
-Flat profile:
-
-Each sample counts as 0.01 seconds.
-  %   cumulative   self              self     total           
- time   seconds   seconds    calls  us/call  us/call  name    
-100.42      0.03     0.03       50   602.51   602.51  multiply(float**, float**, float**, int)
-  0.00      0.03     0.00       50     0.00     0.00  add(float**, float**, float**, int)
-  0.00      0.03     0.00        2     0.00     0.00  init(float**, int)
-  0.00      0.03     0.00        1     0.00     0.00  global constructors keyed to init(float**, int)
