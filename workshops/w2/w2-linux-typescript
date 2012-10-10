@@ -1,0 +1,482 @@
+Script started on Tue 09 Oct 2012 06:15:29 PM PDT
+]0;diogogmt@ubuntu: ~/Documents/DPS915/workshops/w2diogogmt@ubuntu:~/Documents/DPS915/workshops/w2$ whoami
+diogogmt
+]0;diogogmt@ubuntu: ~/Documents/DPS915/workshops/w2diogogmt@ubuntu:~/Documents/DPS915/workshops/w2$ ls
+gmon.out  [0m[01;32mrun-w2.sh[0m    w2-linux-typescript  w2-original.cpp
+[01;34mresults[0m   w2-blas.cpp  [01;32mw2-original[0m          w2.typescript
+]0;diogogmt@ubuntu: ~/Documents/DPS915/workshops/w2diogogmt@ubuntu:~/Documents/DPS915/workshops/w2$ ls results/linux/
+README
+]0;diogogmt@ubuntu: ~/Documents/DPS915/workshops/w2diogogmt@ubuntu:~/Documents/DPS915/workshops/w2$ cat w2-original.cpp 
+// Linear Algebra - Workshop 2
+// w2.cpp
+#include <iostream>
+#include <iomanip>
+#include <vector>
+#include <cmath>
+#include <ctime>
+#include <cstdlib>
+extern "C" {
+#include <gsl/gsl_cblas.h>
+}
+using namespace std;
+#define WIDTH 5
+
+int main(int argc, char * * argv) {
+  time_t ts, te;
+  ts = time(nullptr);
+
+  if (argc == 2) {
+    int k, n = atoi(argv[1]);
+    int dotProduct = 0;
+
+    clock_t cb, ce;
+    float randf = 1.0f / (float) RAND_MAX;
+
+    float * v = new float[n];
+    float * w = new float[n];
+
+    float * r = new float[n]; // result
+
+    float * a = new float[n * n];
+    float * b = new float[n * n];
+
+    float * c = new float[n * n]; // result
+
+    srand(time(nullptr));
+
+    // initialization
+    cb = clock();
+    k = 0;
+    for (int i = 0; i < n; i++) {
+      for (int j = 0; j < n; j++) {
+        // a[k] = rand() * randf;
+        // b[k] = rand() * randf;
+        a[k] = 2;
+        b[k] = 2;
+        c[k] = 0;
+        k++;
+      }
+      // v[i] = rand() * randf;
+      // w[i] = rand() * randf;
+      v[i] = 2;
+      w[i] = 2;
+      r[i] = 0;
+    }
+    ce = clock();
+    cout << "initialization complete - took " << double(ce - cb) / CLOCKS_PER_SEC << " secs" << endl;
+    cout << endl;
+
+    // vector-vector - dot product of v and w
+    cb = clock();
+    // insert code to calculate dot product here
+    for (int i = 0; i < n; i++) {
+      dotProduct += w[i] * v[i];
+    }
+
+    cout << "dotProduct: " << dotProduct << endl;
+    ce = clock();
+    cout << "vector-vector operation complete - took " << double(ce - cb) / CLOCKS_PER_SEC << " secs" << endl;
+    cout << endl;
+
+    // vector-matrix - product of v and a
+    cb = clock();
+    // insert code to calculate product here
+
+    for (int i = 0; i < n; i++) {
+      float sum = 0.0f;
+      for (int j = 0; j < n; j++) {
+        // a[row number * number of rows + col number]
+        sum += a[i * n + j] * v[j];
+      }
+      r[i] = sum;
+    }
+
+    // didn't work
+    // for (int i,j = 0; i < n*n; i++) {
+    //   r[j] += v[j] * a[i];
+    //   !((i+1) % 2) ? j = 0 : j++;
+    // }
+
+    ce = clock();
+    cout << "vector-matrix operation complete - took " << double(ce - cb) / CLOCKS_PER_SEC << " secs" << endl;
+
+    k = 0;
+    cout << setprecision(6) << fixed;
+    cout << setw(5) << 1 << ':';
+    for (int i = 0; i < n; i++) {
+      cout << setw(10) << r[i] << ' ';
+    }
+    cout << endl << endl;
+
+    // matrix-matrix - product of a and b
+    cb = clock();
+    // insert code to calculate product here
+    
+    for (int i = 0; i < n; i++) {
+      for (int j = 0; j < n; j++) {
+        float sum = 0.0f;
+        for (int k = 0; k < n; k++) {
+          sum = sum + a[i * n + k] * b[k * n + j];
+        }
+        c[i * n + j] = sum;
+      }
+    }
+
+    ce = clock();
+    cout << "matrix-matrix operation complete - took " << double(ce - cb) / CLOCKS_PER_SEC << " secs" << endl;
+
+    k = 0;
+    cout << setprecision(6) << fixed;
+    for (int i = 0; i < n; i++) {
+      cout << setw(5) << i + 1 << ':';
+      for (int j = 0; j < n; j++) {
+        cout << setw(10) << c[k++] << ' ';
+        if (j % WIDTH == WIDTH - 1) cout << endl << setw(5) << i + 1 << ':';
+      }
+      cout << endl;
+    }
+    cout << endl;
+
+
+    delete[] a;
+    delete[] b;
+    delete[] c;
+    delete[] v;
+    delete[] w;
+    delete [] r;
+  } else cout << "** dimension is missing **" << endl;
+
+  // elapsed time
+  te = time(nullptr);
+  cout << setprecision(0);
+  cout << "Elapsed time : " << difftime(te, ts) << endl;
+}]0;diogogmt@ubuntu: ~/Documents/DPS915/workshops/w2diogogmt@ubuntu:~/Documents/DPS915/workshops/w2$ cat w2-blas.cpp 
+// Linear Algebra - Workshop 2
+// w2.cpp
+#include <iostream>
+#include <iomanip>
+#include <vector>
+#include <cmath>
+#include <ctime>
+#include <cstdlib>
+extern "C" {
+#include <gsl/gsl_cblas.h>
+}
+using namespace std;
+#define WIDTH 5
+
+int main(int argc, char * * argv) {
+  time_t ts, te;
+  ts = time(nullptr);
+
+  if (argc == 2) {
+    int k, n = atoi(argv[1]);
+
+    clock_t cb, ce;
+    float randf = 1.0f / (float) RAND_MAX;
+
+    float * v = new float[n];
+    float * w = new float[n];
+
+    float * r = new float[n];
+
+    float * a = new float[n * n];
+    float * b = new float[n * n];
+
+    float * c = new float[n * n];
+
+    srand(time(nullptr));
+
+    // initialization
+    cb = clock();
+    k = 0;
+    for (int i = 0; i < n; i++) {
+      for (int j = 0; j < n; j++) {
+        // a[k] = rand() * randf;
+        // b[k] = rand() * randf;
+        a[k] = 2;
+        b[k] = 2;
+        k++;
+      }
+      // v[i] = rand() * randf;
+      // w[i] = rand() * randf;
+      v[i] = 2;
+      w[i] = 2;
+    }
+    ce = clock();
+    cout << "initialization complete - took " << double(ce - cb) / CLOCKS_PER_SEC << " secs" << endl;
+    cout << endl;
+
+    // vector-vector - dot product of v and w
+
+
+    cb = clock();
+    // insert code to calculate dot product here
+    float dotProduct = cblas_sdot(
+    n, //const int N,
+    v, //const float *X,
+    0, //const int incX,
+    w, //const float *Y,
+    0 //const int incY
+    );
+
+    ce = clock();
+    cout << "dotProduct: " << dotProduct << endl;
+    cout << "vector-vector operation complete - took " << double(ce - cb) / CLOCKS_PER_SEC << " secs" << endl;
+    cout << endl;
+
+    // vector-matrix - product of v and a
+    cb = clock();
+    // insert code to calculate product here
+    cblas_sgemv(
+      CblasRowMajor, //const enum CBLAS_ORDER    order,
+      CblasNoTrans, //const enum CBLAS_TRANSPOSE    TransA,
+      n, //const int   M,
+      n, //const int   N,
+      1.0, //const float   alpha,
+      a, //const float *   A,
+      n, //const int   lda,
+      v, //const float *   X,
+      1, //const int   incX,
+      1.0 ,//const float   beta,
+      r, //float *   Y,
+      1 //const int   incY   
+    );   
+    ce = clock();
+    cout << "vector-matrix operation complete - took " << double(ce - cb) / CLOCKS_PER_SEC << " secs" << endl;
+
+    k = 0;
+    cout << setprecision(6) << fixed;
+    cout << setw(5) << 1 << ':';
+    for (int i = 0; i < n; i++) {
+      cout << setw(10) << r[i] << ' ';
+    }
+    cout << endl;
+    cout << endl;
+
+    // matrix-matrix - product of a and b
+    cb = clock();
+    // insert code to calculate product here
+    cblas_sgemm(
+      CblasRowMajor, // const enum CBLAS_ORDER    Order,
+      CblasNoTrans, // const enum CBLAS_TRANSPOSE    TransA,
+      CblasNoTrans, // const enum CBLAS_TRANSPOSE    TransB,
+      n, //const int   M,
+      n ,//const int   N,
+      n, //const int   K,
+      1.0, //const float   alpha,
+      a, //const float *   A,
+      n, //const int   lda,
+      b, //const float *   B,
+      n, //const int   ldb,
+      1.0, //const float   beta,
+      c, //float *   C,
+      n //const int   ldc  
+    );
+    ce = clock();
+    cout << "matrix-matrix operation complete - took " << double(ce - cb) / CLOCKS_PER_SEC << " secs" << endl;
+
+    k = 0;
+    cout << setprecision(6) << fixed;
+    for (int i = 0; i < n; i++) {
+      cout << setw(5) << i + 1 << ':';
+      for (int j = 0; j < n; j++) {
+        cout << setw(10) << c[k++] << ' ';
+        if (j % WIDTH == WIDTH - 1) cout << endl << setw(5) << i + 1 << ':';
+      }
+      cout << endl;
+    }
+    cout << endl;
+
+
+    delete[] a;
+    delete[] b;
+    delete[] c;
+    delete[] v;
+    delete[] w;
+    delete [] r;
+  } else cout << "** dimension is missing **" << endl;
+
+  // elapsed time
+  te = time(nullptr);
+  cout << setprecision(0);
+  cout << "Elapsed time : " << difftime(te, ts) << endl;
+}]0;diogogmt@ubuntu: ~/Documents/DPS915/workshops/w2diogogmt@ubuntu:~/Documents/DPS915/workshops/w2$ cat run-w2.sh 
+#!/bin/bash
+
+# First Set
+N[0]=250
+N[1]=500
+N[2]=1000
+
+
+if [ $(uname) = "Darwin" ]
+then
+  OS="mac"
+  CC="g++-4.7"
+else
+  OS="linux"
+  CC="g++"
+fi
+
+echo "OS $OS"
+
+OPTIONS="-std=c++0x -O2 -g -pg"
+LIBS="-lgslcblas"
+LIBRARY_PATH="-L /usr/local/lib"
+OBJ=$1
+SRC="$1.cpp"
+
+echo $OBJ
+echo $SRC
+
+INSTRUMENT_TEMPLATE="/Applications/Xcode.app/Contents/Applications/Instruments.app/Contents/Resources/templates/Time Profiler.tracetemplate"
+#compile workshop
+$CC $OPTIONS -o $OBJ $SRC $LIBRARY_PATH $LIBS
+
+#generate profile info
+for i in {0..2}
+do
+  echo "Running ${i}th set"
+  if [ $OS = "mac" ]
+  then
+    echo "Running on MacOS"
+    FILE="results/mac/${OBJ}-${N[$i]}.log"
+    echo $FILE
+    instruments -t "$INSTRUMENT_TEMPLATE" -D $FILE $OBJ ${N[$i]}
+  else
+    echo "Running some linux distro."
+    ./$OBJ ${N[$i]}
+    FILE="results/linux/${OBJ}-${N[$i]}.log"
+    gprof -p $OBJ > $FILE
+  fi
+done
+
+]0;diogogmt@ubuntu: ~/Documents/DPS915/workshops/w2diogogmt@ubuntu:~/Documents/DPS915/workshops/w2$ ./run-w2.sh w2-original > /dev/null
+]0;diogogmt@ubuntu: ~/Documents/DPS915/workshops/w2diogogmt@ubuntu:~/Documents/DPS915/workshops/w2$ ls results/linux/
+README  w2-original-1000.log  w2-original-250.log  w2-original-500.log
+]0;diogogmt@ubuntu: ~/Documents/DPS915/workshops/w2diogogmt@ubuntu:~/Documents/DPS915/workshops/w2$ ./run-w2.sh w2-blas.cpp > /dev/null
+g++: error: w2-blas.cpp.cpp: No such file or directory
+./run-w2.sh: line 45: ./w2-blas.cpp: Permission denied
+gprof: w2-blas.cpp: not in executable format
+./run-w2.sh: line 45: ./w2-blas.cpp: Permission denied
+gprof: w2-blas.cpp: not in executable format
+./run-w2.sh: line 45: ./w2-blas.cpp: Permission denied
+gprof: w2-blas.cpp: not in executable format
+]0;diogogmt@ubuntu: ~/Documents/DPS915/workshops/w2diogogmt@ubuntu:~/Documents/DPS915/workshops/w2$ ./run-w2.sh w2-blas.cpp > /dev/null[1P[1P[1P[1P
+]0;diogogmt@ubuntu: ~/Documents/DPS915/workshops/w2diogogmt@ubuntu:~/Documents/DPS915/workshops/w2$ ls results/linux/
+README            w2-blas-500.log       w2-blas.cpp-500.log   w2-original-500.log
+w2-blas-1000.log  w2-blas.cpp-1000.log  w2-original-1000.log
+w2-blas-250.log   w2-blas.cpp-250.log   w2-original-250.log
+]0;diogogmt@ubuntu: ~/Documents/DPS915/workshops/w2diogogmt@ubuntu:~/Documents/DPS915/workshops/w2$ cat results/linux/w2-blas-500.log 
+Flat profile:
+
+Each sample counts as 0.01 seconds.
+ no time accumulated
+
+  %   cumulative   self              self     total           
+ time   seconds   seconds    calls  Ts/call  Ts/call  name    
+  0.00      0.00     0.00        1     0.00     0.00  _GLOBAL__sub_I_main
+
+ %         the percentage of the total running time of the
+time       program used by this function.
+
+cumulative a running sum of the number of seconds accounted
+ seconds   for by this function and those listed above it.
+
+ self      the number of seconds accounted for by this
+seconds    function alone.  This is the major sort for this
+           listing.
+
+calls      the number of times this function was invoked, if
+           this function is profiled, else blank.
+ 
+ self      the average number of milliseconds spent in this
+ms/call    function per call, if this function is profiled,
+	   else blank.
+
+ total     the average number of milliseconds spent in this
+ms/call    function and its descendents per call, if this 
+	   function is profiled, else blank.
+
+name       the name of the function.  This is the minor sort
+           for this listing. The index shows the location of
+	   the function in the gprof listing. If the index is
+	   in parenthesis it shows where it would appear in
+	   the gprof listing if it were to be printed.
+]0;diogogmt@ubuntu: ~/Documents/DPS915/workshops/w2diogogmt@ubuntu:~/Documents/DPS915/workshops/w2$ cat results/linux/w2-blas-500.log [K[K[K[K[K[K[K[K250.log 
+Flat profile:
+
+Each sample counts as 0.01 seconds.
+ no time accumulated
+
+  %   cumulative   self              self     total           
+ time   seconds   seconds    calls  Ts/call  Ts/call  name    
+  0.00      0.00     0.00        1     0.00     0.00  _GLOBAL__sub_I_main
+
+ %         the percentage of the total running time of the
+time       program used by this function.
+
+cumulative a running sum of the number of seconds accounted
+ seconds   for by this function and those listed above it.
+
+ self      the number of seconds accounted for by this
+seconds    function alone.  This is the major sort for this
+           listing.
+
+calls      the number of times this function was invoked, if
+           this function is profiled, else blank.
+ 
+ self      the average number of milliseconds spent in this
+ms/call    function per call, if this function is profiled,
+	   else blank.
+
+ total     the average number of milliseconds spent in this
+ms/call    function and its descendents per call, if this 
+	   function is profiled, else blank.
+
+name       the name of the function.  This is the minor sort
+           for this listing. The index shows the location of
+	   the function in the gprof listing. If the index is
+	   in parenthesis it shows where it would appear in
+	   the gprof listing if it were to be printed.
+]0;diogogmt@ubuntu: ~/Documents/DPS915/workshops/w2diogogmt@ubuntu:~/Documents/DPS915/workshops/w2$ cat results/linux/w2-blas-250.log [K[K[K[K[K[K[K[K1000.log 
+Flat profile:
+
+Each sample counts as 0.01 seconds.
+ no time accumulated
+
+  %   cumulative   self              self     total           
+ time   seconds   seconds    calls  Ts/call  Ts/call  name    
+  0.00      0.00     0.00        1     0.00     0.00  _GLOBAL__sub_I_main
+
+ %         the percentage of the total running time of the
+time       program used by this function.
+
+cumulative a running sum of the number of seconds accounted
+ seconds   for by this function and those listed above it.
+
+ self      the number of seconds accounted for by this
+seconds    function alone.  This is the major sort for this
+           listing.
+
+calls      the number of times this function was invoked, if
+           this function is profiled, else blank.
+ 
+ self      the average number of milliseconds spent in this
+ms/call    function per call, if this function is profiled,
+	   else blank.
+
+ total     the average number of milliseconds spent in this
+ms/call    function and its descendents per call, if this 
+	   function is profiled, else blank.
+
+name       the name of the function.  This is the minor sort
+           for this listing. The index shows the location of
+	   the function in the gprof listing. If the index is
+	   in parenthesis it shows where it would appear in
+	   the gprof listing if it were to be printed.
+]0;diogogmt@ubuntu: ~/Documents/DPS915/workshops/w2diogogmt@ubuntu:~/Documents/DPS915/workshops/w2$ exit
+exit
+
+Script done on Tue 09 Oct 2012 06:17:51 PM PDT

@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # First Set
-N[0]=300
-N[1]=400
-N[2]=500
+N[0]=250
+N[1]=500
+N[2]=1000
 
 
 if [ $(uname) = "Darwin" ]
@@ -12,13 +12,14 @@ then
   CC="g++-4.7"
 else
   OS="linux"
-  cc="g++"
+  CC="g++"
 fi
 
-echo "OS $OS"s
+echo "OS $OS"
 
 OPTIONS="-std=c++0x -O2 -g -pg"
 LIBS="-lgslcblas"
+LIBRARY_PATH="-L /usr/local/lib"
 OBJ=$1
 SRC="$1.cpp"
 
@@ -27,7 +28,7 @@ echo $SRC
 
 INSTRUMENT_TEMPLATE="/Applications/Xcode.app/Contents/Applications/Instruments.app/Contents/Resources/templates/Time Profiler.tracetemplate"
 #compile workshop
-$CC $OPTIONS -o $OBJ $SRC $LIBS
+$CC $OPTIONS -o $OBJ $SRC $LIBRARY_PATH $LIBS
 
 #generate profile info
 for i in {0..2}
@@ -42,7 +43,8 @@ do
   else
     echo "Running some linux distro."
     ./$OBJ ${N[$i]}
-    gprof -p $OBJ > "results/linux/${N[$i]}x${NR[$i]}.log"
+    FILE="results/linux/${OBJ}-${N[$i]}.log"
+    gprof -p $OBJ > $FILE
   fi
 done
 
