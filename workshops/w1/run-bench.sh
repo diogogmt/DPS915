@@ -50,10 +50,10 @@ then
   CC="g++-4.7"
 else
   OS="linux"
-  cc="g++"
+  CC="g++"
 fi
 
-echo "OS $OS"s
+echo "OS $OS"
 
 OPTIONS="-std=c++0x -O2 -g -pg"
 OBJ="w1"
